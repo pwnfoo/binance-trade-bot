@@ -1,6 +1,10 @@
 import math
 import time
 from typing import Dict, List
+try:
+    from playsound import playsound
+except:
+    print("[!] To play sounds, you will need to install playsound. Hint: [sudo] pip3 install playsound")
 
 from binance.client import Client
 from binance.exceptions import BinanceAPIException
@@ -31,6 +35,8 @@ class BinanceAPIManager:
         self.db = db
         self.logger = logger
         self.config = config
+        self.buy_sound = 'data/sounds/buy.wav'
+        self.sell_sound = 'data/sounds/sell.wav'
 
     @cached(cache=TTLCache(maxsize=1, ttl=43200))
     def get_trade_fees(self) -> Dict[str, float]:
@@ -246,6 +252,8 @@ class BinanceAPIManager:
             return None
 
         self.logger.info(f"Bought {origin_symbol}")
+        playsound(self.buy_sound)
+
         trade_log.set_complete(stat["cummulativeQuoteQty"])
 
         return order
@@ -300,6 +308,7 @@ class BinanceAPIManager:
             new_balance = self.get_currency_balance(origin_symbol)
 
         self.logger.info(f"Sold {origin_symbol}")
+        playsound(self.sell_sound)
 
         trade_log.set_complete(stat["cummulativeQuoteQty"])
 
