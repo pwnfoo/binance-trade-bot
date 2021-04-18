@@ -252,7 +252,11 @@ class BinanceAPIManager:
             return None
 
         self.logger.info(f"Bought {origin_symbol}")
-        playsound(self.buy_sound)
+
+        try:
+            playsound(self.buy_sound)
+        except:
+            self.logger.error("Play sound failed!")
 
         trade_log.set_complete(stat["cummulativeQuoteQty"])
 
@@ -308,7 +312,11 @@ class BinanceAPIManager:
             new_balance = self.get_currency_balance(origin_symbol)
 
         self.logger.info(f"Sold {origin_symbol}")
-        playsound(self.sell_sound)
+
+        try:
+            playsound(self.sell_sound)
+        except:
+            self.logger.error("Play sound failed!")
 
         trade_log.set_complete(stat["cummulativeQuoteQty"])
 
