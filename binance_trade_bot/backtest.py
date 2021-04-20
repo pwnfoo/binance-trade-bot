@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 from traceback import format_exc
 from typing import Dict
+try:
+    from playsound import playsound
+except:
+    print("[!] To play sounds, you will need to install playsound. Hint: [sudo] pip3 install playsound")
 
 from sqlitedict import SqliteDict
 
@@ -28,13 +32,16 @@ class MockBinanceManager(BinanceAPIManager):
         config: Config,
         db: Database,
         logger: Logger,
-        start_date: datetime = None,
+        start_date: datetime = datetime(2021,4,1),
         start_balances: Dict[str, float] = None,
     ):
         super().__init__(config, db, logger)
         self.config = config
-        self.datetime = start_date or datetime(2021, 1, 1)
+        self.datetime = start_date or datetime(2021, 4, 1)
         self.balances = start_balances or {config.BRIDGE.symbol: 100}
+
+        self.buy_sound = 'data/sounds/buy.wav'
+        self.sell_sound = 'data/sounds/sell.wav'
 
     def increment(self, interval=1):
         self.datetime += timedelta(minutes=interval)
@@ -94,6 +101,12 @@ class MockBinanceManager(BinanceAPIManager):
             f"Bought {origin_symbol}, balance now: {self.balances[origin_symbol]} - bridge: "
             f"{self.balances[target_symbol]}"
         )
+
+        try:
+            playsound(self.buy_sound)
+        except:
+            self.logger.error("Play sound failed!")
+
         return {"price": from_coin_price}
 
     def sell_alt(self, origin_coin: Coin, target_coin: Coin, all_tickers: AllTickers):
@@ -113,6 +126,12 @@ class MockBinanceManager(BinanceAPIManager):
             f"Sold {origin_symbol}, balance now: {self.balances[origin_symbol]} - bridge: "
             f"{self.balances[target_symbol]}"
         )
+
+        try:
+            playsound(self.sell_sound)
+        except:
+            self.logger.error("Play sound failed!")
+
         return {"price": from_coin_price}
 
     def collate_coins(self, target_symbol: str):
@@ -143,9 +162,9 @@ class MockDatabase(Database):
 
 
 def backtest(
-    start_date: datetime = None,
-    end_date: datetime = None,
-    interval=1,
+    start_date: datetime = datetime(2021,4,1),
+    end_date: datetime = datetime(2021,4,13),
+    interval=2,
     yield_interval=100,
     start_balances: Dict[str, float] = None,
     starting_coin: str = None,
